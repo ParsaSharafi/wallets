@@ -1,0 +1,92 @@
+<div class="card mx-auto" style="width: 90%; margin-top: 10%;">
+  <div class="card-body">
+    <div class="row">
+      <p>leave recipient's username empty if you want to send money to another one of your own wallets!</p>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <input type="text" [(ngModel)]="smdto.destinationUsername" (keyup.enter)="sendMoney(smdto)" class="form-control"
+               placeholder="recipient's username" />
+      </div>
+      <div class="col-6">
+        <input type="text" [(ngModel)]="smdto.destinationWalletTag" (keyup.enter)="sendMoney(smdto)" class="form-control"
+               placeholder="recipient's wallet-tag" />
+      </div>
+    </div>
+    <p></p>
+    <div class="row">
+      <div class="col-6">
+        <input type="number" [(ngModel)]="smdto.amount" (keyup)="calculate()" (keyup.enter)="sendMoney(smdto)" class="form-control" />
+      </div>
+      <div class="col-6">
+        <button class="btn btn-success" (click)="sendMoney(smdto)">SEND ~ {{payable.toFixed(2)}}</button>
+      </div>
+    </div>
+    <div class="row">
+      <p></p>
+      <p>exchange fee ({{fees.exchangeFee}}) if conversion is required</p>
+      <p>transfer fee ({{fees.transferFee}}) if sending to another user</p>
+      <p>total fees ~ {{fee.toFixed(2)}} deducted from your amount</p>
+    </div>
+  </div>
+</div>
+
+<div class="card mx-auto" style="width: 90%; margin-top: 10%;">
+  <div class="card-body">
+    <div class="row">
+      <p>pick a name to add a new wallet which will be auto-prefixed with your currency of choice to be its tag!</p>
+    </div>
+    <div class="row">
+      <div class="col-2">
+        <label>choose: </label>
+      </div>
+      <div class="col-3">
+        <select [(ngModel)]="awdto.currency" class="form-control">
+          <option></option>
+          @for (currency of currencies; track currency.code) {
+          <option>{{currency.code}}</option>
+          }
+        </select>
+      </div>
+      <div class="col-7">
+        <input type="text" [(ngModel)]="awdto.name" (keyup.enter)="addWallet(awdto)" class="form-control" placeholder="wallet's name" />
+      </div>
+    </div>
+    <p></p>
+    <div class="row">
+      <button class="btn btn-success" (click)="addWallet(awdto)">ADD {{awdto.currency}}_{{awdto.name}} TO YOUR WALLETS</button>
+    </div>
+  </div>
+</div>
+
+<div class="card mx-auto" style="width: 90%; margin-top: 10%;">
+  <div class="card-body">
+    <div class="row">
+      <p>the requested amount will be deposited into your wallet after your bank clears it!</p>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <input type="number" [(ngModel)]="dAmount" (keyup.enter)="deposit(dAmount)" class="form-control"/>
+      </div>
+      <div class="col-6">
+        <button class="btn btn-success" (click)="deposit(dAmount)">REQUEST DEPOSIT</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mx-auto" style="width: 90%; margin-top: 10%;">
+  <div class="card-body">
+    <div class="row">
+      <p>amount will be refunded to your wallet if your bank refuses it!</p>
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <input type="number" [(ngModel)]="wAmount" (keyup.enter)="withdrawal(wAmount)" class="form-control" />
+      </div>
+      <div class="col-6">
+        <button class="btn btn-success" (click)="withdrawal(wAmount)">WITHDRAWAL</button>
+      </div>
+    </div>
+  </div>
+</div>

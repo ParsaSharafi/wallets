@@ -1,0 +1,16 @@
+<table class="table table-hover text-center">
+  <thead>
+    <tr>
+      <th>code</th>
+      <th>rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (currency of currencies; track currency.code) {
+    <tr>
+      <td>{{currency.code}}</td>
+      <td>{{currency.rate}}</td>
+    </tr>
+    }
+  </tbody>
+</table>

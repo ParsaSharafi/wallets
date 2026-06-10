@@ -1,0 +1,51 @@
+@if (loggedIn) {
+<div class="row align-items-center bg-light mx-auto">
+  <div class="col-2">
+    <h1>pick wallet</h1>
+  </div>
+  <div class="col-4">
+    <h1 style="margin-left: 20%;">its transactions</h1>
+  </div>
+  <div class="col-4">
+    <h1 style="margin-left: 10%;">welcome back, {{user.username}}!</h1>
+  </div>
+  <div class="col-2">
+    <button style="margin-left: 50%;" class="btn btn-danger" (click)="logOut()">log out</button>
+  </div>
+</div>
+<div class="row">
+  <div class="col-6">
+    <app-wallets></app-wallets>
+  </div>
+  <div class="col-4">
+    <app-panel></app-panel>
+  </div>
+  <div class="col-2">
+    <app-currencies></app-currencies>
+  </div>
+</div>
+} @else {
+<div class="card mx-auto" style="width: 30%; margin-top: 10%;">
+  <div class="card-header bg-success">
+    WELCOME!
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <label>username</label>
+      <input type="text" [(ngModel)]="user.username" (keyup.enter)="logIn(user)" class="form-control" />
+    </div>
+    <div class="row">
+      <label>password</label>
+      <input type="password" [(ngModel)]="user.password" (keyup.enter)="logIn(user)" class="form-control" />
+    </div>
+    <div class="row">
+      <div class="col-6">
+        <button class="btn btn-success m-5" (click)="logIn(user)">log in</button>
+      </div>
+      <div class="col-6">
+        <button class="btn btn-info m-5" (click)="signUp(user)">sign up</button>
+      </div>
+    </div>
+  </div>
+</div>
+}

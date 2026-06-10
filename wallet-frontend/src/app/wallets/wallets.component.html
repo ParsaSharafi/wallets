@@ -1,0 +1,33 @@
+<div class="row">
+  <div class="list-group col-4">
+    @for (wallet of wallets; track wallet.tag) {
+    <button type="button" class="list-group-item " [ngClass]="wallet.tag == pickedWallet ? 'list-group-item-action' : ''" (click)="pick(wallet.tag)">
+      <p>{{wallet.tag}}</p>
+      <p>balance: {{round(wallet.balance)}}</p>
+      <p>opened: {{wallet.created | date : 'yyyy/MM/dd'}}</p>
+    </button>
+    }
+  </div>
+  <div class="list-group col-8">
+    @for (transaction of transactions; track transaction.initiated) {
+    <div class="card mx-auto" style="width: 90%; margin-top: 10%;">
+      <div class="card-header mx-aouto {{transaction.signedAmount > 0 ? 'bg-success' : 'bg-danger'}} ">
+        {{round(transaction.signedAmount)}}
+      </div>
+      <div class="row">
+        <div class="col-3">
+          @if (transaction.info.includes("-->")) {{{transaction.signedAmount > 0 ? 'from:' : 'to:'}}} @else {reference:}
+        </div>
+        <div class="col-9">{{transaction.info}}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-8">{{transaction.initiated | date : 'EEEE, MMMM d, h:mm:ss'}}</div>
+        <div class="col-4"><p class="
+                              {{transaction.status == 'SUCCESSFUL' ? 'text-success' : transaction.status == 'UNSUCCESSFUL' ? 'text-danger' : 'text-warning'}}
+                              ">{{transaction.status}}</p></div>
+      </div>
+    </div>
+    }
+  </div>
+</div>
