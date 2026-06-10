@@ -1,0 +1,84 @@
+services:
+
+ gatewaydb:
+  image: postgres:alpine
+  environment:
+   - POSTGRES_USER=${DB_USER}
+   - POSTGRES_PASSWORD=${DB_PASS}
+   - POSTGRES_DB=gateway
+
+ walletsdb:
+  image: postgres:alpine
+  environment:
+   - POSTGRES_USER=${DB_USER}
+   - POSTGRES_PASSWORD=${DB_PASS}
+   - POSTGRES_DB=wallets
+
+ msgbroker:
+  image: apache/kafka:4.3.0
+  hostname: msgbroker
+  container_name: msgbroker
+  environment:
+   - KAFKA_NODE_ID=1
+   - KAFKA_PROCESS_ROLES=broker,controller
+   - KAFKA_CONTROLLER_QUORUM_VOTERS=1@msgbroker:9093
+   - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+   - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://msgbroker:9092
+   - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+   - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+   - CLUSTER_ID=5L6g3nShT-eMCtK--X86sw
+   - KAFKA_DEFAULT_REPLICATION_FACTOR=1
+   - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+
+ ftp:
+  image: atmoz/sftp:alpine
+  command: ${FTP_USR}:${FTP_PASS}:1001
+ 
+ rateupdater:
+  build: ./ExchangeRateUpdater/
+  environment:
+   - BOOTSTRAP_SERVERS=${BTSTRP_SRVRS}
+  depends_on:
+   - "msgbroker"
+ 
+ paymentgw:
+  build: ./PaymentGateway/
+  environment:
+   - GATEWAY_DB_URL=${GATEWAY_DB}
+   - GATEWAY_DB_USERNAME=${DB_USER}
+   - GATEWAY_DB_PASSWORD=${DB_PASS}
+   - WALLETS_BASE_URL=${WALLETS_URL}
+   - FTP_HOST=ftp
+   - FTP_USER=${FTP_USR}
+   - FTP_PASSWORD=${FTP_PASS}
+  ports:
+   - "8080:8080"
+  depends_on:
+   - "gatewaydb"
+
+ walletsapp:
+  build: ./wallets/
+  environment:
+   - WALLETS_DB_URL=${WALLETS_DB}
+   - WALLETS_DB_USERNAME=${DB_USER}
+   - WALLETS_DB_PASSWORD=${DB_PASS}
+   - GATEWAY_BASE_URL=${GATEWAY_URL}
+   - BOOTSTRAP_SERVERS=${BTSTRP_SRVRS}
+   - EXCHANGE_FEE=0.03125
+   - TRANSFER_FEE=0.05
+  #UNCOMMENT BELOW TO USE SWAGGER INSTEAD OF FRONTEND
+  #ports:
+  # - "9090:8080"
+  depends_on:
+   - "walletsdb"
+   - "msgbroker"
+
+ frontend:
+  build:
+   context: ./wallet-frontend/
+   args:
+   - API_URL=${WALLETS_URL}
+  ports:
+   - "80:80"
+  depends_on:
+   - "walletsapp"
