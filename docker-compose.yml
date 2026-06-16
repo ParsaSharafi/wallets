@@ -32,7 +32,7 @@ services:
 
  ftp:
   image: atmoz/sftp:alpine
-  command: ${FTP_USR}:${FTP_PASS}:1001
+  command: ${FTP_USR}:${FTP_PASS}:::upload
  
  rateupdater:
   build: ./ExchangeRateUpdater/
@@ -55,6 +55,7 @@ services:
    - "8080:8080"
   depends_on:
    - "gatewaydb"
+   - "ftp"
 
  walletsapp:
   build: ./wallets/

@@ -134,7 +134,8 @@ public class Controller {
     }
 
     public void writeToFile(String reference, String status) {
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(status + Calendar.MINUTE),
+        try (BufferedWriter writer = Files.newBufferedWriter(
+                Paths.get(status + Calendar.getInstance().get(Calendar.MINUTE)),
                 StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
             writer.write(reference);
             writer.newLine();

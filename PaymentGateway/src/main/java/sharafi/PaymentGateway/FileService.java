@@ -1,16 +1,14 @@
 package sharafi.PaymentGateway;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,17 +20,9 @@ import java.util.Calendar;
 @RequiredArgsConstructor
 public class FileService {
 
-    @Value("${ftp.host}")
-    private String ftpHost;
-
-    @Value("${ftp.user}")
-    private String ftpUser;
-
-    @Value("${ftp.password}")
-    private String ftpPassword;
-
     private final TokenService tokenService;
     private final RestClient restClient;
+    private final ChannelSftp channelSftp;
 
     //reinforming the wallets service of successful transfers if api call failed the first time
     @Scheduled(cron = "${cron.successful}")
@@ -40,7 +30,7 @@ public class FileService {
 
         tokenService.refreshToken();
 
-        Path path = Paths.get("SUCCESSFUL" + (Calendar.MINUTE - 1));
+        Path path = Paths.get("SUCCESSFUL" + (Calendar.getInstance().get(Calendar.MINUTE) - 1));
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
 
@@ -68,7 +58,7 @@ public class FileService {
 
         tokenService.refreshToken();
 
-        Path path = Paths.get("UNSUCCESSFUL" + (Calendar.MINUTE - 1));
+        Path path = Paths.get("UNSUCCESSFUL" + (Calendar.getInstance().get(Calendar.MINUTE) - 1));
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
 
@@ -94,31 +84,18 @@ public class FileService {
     @Scheduled(cron = "${cron.pending}")
     public void pending() {
 
-        Path path = Paths.get("PENDING" + (Calendar.MINUTE - 1));
+        Path path = Paths.get("PENDING" + (Calendar.getInstance().get(Calendar.MINUTE) - 1));
 
-        try {
+        try (FileInputStream fis = new FileInputStream(path.toString())) {
 
-            JSch jsch = new JSch();
-
-            Session session = jsch.getSession(ftpUser, ftpHost, 22);
-            session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword(ftpPassword);
-            session.connect();
-
-            ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
-            sftpChannel.connect();
-
-            sftpChannel.put(path.toString(), ".");
-
-            sftpChannel.disconnect();
-            session.disconnect();
+            channelSftp.put(fis, "upload/" + path);
 
             Files.deleteIfExists(path);
 
             log.info("Successfully Uploaded Pending Transfers To FTP");
 
         } catch (IOException e) {
-            log.warn("Failed To Delete The PENDING File: {}", e.toString());
+            log.warn("Failed To Read The PENDING File: {}", e.toString());
         } catch (Exception e) {
             log.warn("Failed To Upload Pending Transfers To FTP: {}", e.toString());
         }
